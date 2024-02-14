@@ -1,0 +1,118 @@
+mql5
+//+------------------------------------------------------------------+
+//|                                           RSI FX Quebra Broker MT5|
+//|                               Developer's Site: forexroboteasy.com|
+//|                                           Developed by: Forex Robot Easy Team|
+//+------------------------------------------------------------------+
+
+// Include necessary libraries
+#include <Trade\Trade.mqh>
+
+// Define constants
+#define RSI_PERIOD 14
+#define RSI_OVERBOUGHT 70
+#define RSI_OVERSOLD 30
+#define MAX_POSITION_SIZE 0.01
+#define MAX_LOSS_PERCENT 0.02
+
+//+------------------------------------------------------------------+
+//| Custom indicator functions                                       |
+//+------------------------------------------------------------------+
+
+// Calculate RSI indicator values
+double CalculateRSI(int period)
+{
+   // Add code here to calculate RSI values based on user-defined parameters
+   // Use the built-in iRSI() function to calculate RSI
+   double rsiBuffer[];
+   CopyBuffer(iRSI(_Symbol, PERIOD_CURRENT, period, PRICE_CLOSE), 0, 0, Bars, rsiBuffer);
+   return rsiBuffer[0];
+}
+
+// Identify potential reversal opportunities based on RSI values
+bool IdentifyReversalOpportunity(double rsiValue)
+{
+   // Add code here to identify potential reversal opportunities based on RSI values
+   // Use user-defined parameters RSI_OVERBOUGHT and RSI_OVERSOLD
+   if (rsiValue > RSI_OVERBOUGHT || rsiValue < RSI_OVERSOLD)
+      return true;
+   else
+      return false;
+}
+
+//+------------------------------------------------------------------+
+//| Trading functions                                                |
+//+------------------------------------------------------------------+
+
+// Manage position size and risk of trades
+double CalculatePositionSize(double accountBalance)
+{
+   // Add code here to calculate position size based on user-defined parameters
+   // Use MAX_POSITION_SIZE and MAX_LOSS_PERCENT to mitigate risk
+   double positionSize = MathFloor(accountBalance * MAX_POSITION_SIZE);
+   return positionSize;
+}
+
+// Execute trades based on reversal opportunities
+void ExecuteTrades()
+{
+   // Add code here to execute trades based on identified reversal opportunities
+   // Use the built-in CTrade class to execute trades
+   CTrade trade;
+   if (IdentifyReversalOpportunity(CalculateRSI(RSI_PERIOD)))
+   {
+      double positionSize = CalculatePositionSize(AccountBalance());
+      trade.Buy(positionSize, _Symbol);
+      trade.Sell(positionSize, _Symbol);
+   }
+}
+
+// Monitor and track trade performance
+void MonitorTradePerformance()
+{
+   // Add code here to monitor and track trade performance
+   // Use the built-in CTrade class to track trades
+   CTrade trade;
+   if (trade.PositionSelect(_Symbol))
+   {
+      Print('Trade opened at price: ', trade.PositionGetDouble(POSITION_PRICE_OPEN));
+      Print('Trade closed at price: ', trade.PositionGetDouble(POSITION_PRICE_CLOSE));
+      Print('Trade profit/loss: ', trade.PositionGetDouble(POSITION_PROFIT));
+   }
+}
+
+//+------------------------------------------------------------------+
+//| Expert initialization function                                   |
+//+------------------------------------------------------------------+
+int OnInit()
+{
+   // Add code here for expert initialization
+   return INIT_SUCCEEDED;
+}
+
+//+------------------------------------------------------------------+
+//| Expert deinitialization function                                 |
+//+------------------------------------------------------------------+
+void OnDeinit(const int reason)
+{
+   // Add code here for expert deinitialization
+}
+
+//+------------------------------------------------------------------+
+//| Expert tick function                                             |
+//+------------------------------------------------------------------+
+void OnTick()
+{
+   // Add code here for expert tick
+   ExecuteTrades();
+   MonitorTradePerformance();
+}
+
+//+------------------------------------------------------------------+
+//| Expert start function                                            |
+//+------------------------------------------------------------------+
+void OnStart()
+{
+   // Add code here for expert start
+}
+
